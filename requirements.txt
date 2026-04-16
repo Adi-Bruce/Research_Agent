@@ -1,0 +1,5 @@
+pydantic
+fastapi[standard]
+torch
+pypdf
+ddgs
