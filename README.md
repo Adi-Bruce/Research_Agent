@@ -164,23 +164,80 @@ classDiagram
 
 ## Setup
 
-The project is intended to run in the `thenv` conda environment.
+### Prerequisites
+
+- Python 3.11 or newer
+- `git`
+- `pip`
+
+### Clone the Repository
 
 ```bash
-conda activate thenv
+git clone <repo-url>
+cd Research_agent
+```
+
+Replace `<repo-url>` with the GitHub URL for this repository.
+
+### Create a Virtual Environment
+
+Using `venv`:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+```
+
+On Windows PowerShell:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
+
+Using conda:
+
+```bash
+conda create -n research-agent python=3.11 -y
+conda activate research-agent
+```
+
+### Install Dependencies
+
+```bash
 python -m pip install -r requirements.txt
 ```
 
-Run the API:
+### Configure Environment Variables
+
+Create a `.env` file in the repository root:
+
+```bash
+cp .env.example .env
+```
+
+If `.env.example` is not present yet, create `.env` manually:
+
+```env
+WEB_SEARCH_PROVIDER=duckduckgo
+PAPER_SEARCH_PROVIDERS=openalex,arxiv
+OPENALEX_EMAIL=you@example.com
+```
+
+The default retrieval path does not require Brave Search or Semantic Scholar keys.
+
+LLM keys are optional for the current deterministic pipeline. Add one only if you want to use `app/services/llm/client.py`:
+
+```env
+LLM_PROVIDER=gemini
+GEMINI_API_KEY=your_key
+GEMINI_MODEL=gemini-2.0-flash
+```
+
+### Run the API
 
 ```bash
 uvicorn app.main:app --reload
-```
-
-Or without activating the environment:
-
-```bash
-conda run -n thenv uvicorn app.main:app --reload
 ```
 
 Open the interactive docs:
@@ -199,6 +256,31 @@ Expected response:
 
 ```json
 {"status":"ok"}
+```
+
+### Run a Research Request
+
+```bash
+curl -X POST http://127.0.0.1:8000/research \
+  -H "Content-Type: application/json" \
+  -d '{
+    "topic": "green hydrogen production costs and limitations",
+    "depth": "quick",
+    "max_sources": 3,
+    "include_papers": true,
+    "include_web": true,
+    "date_range": null,
+    "language": "en",
+    "required_domains": [],
+    "blocked_domains": []
+  }'
+```
+
+### Verify the Installation
+
+```bash
+python -m compileall app
+python -c "from app.main import app; print([route.path for route in app.routes])"
 ```
 
 ## Environment Variables
